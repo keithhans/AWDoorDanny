@@ -8,7 +8,7 @@ android {
     //buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.nuwarobotics.sdk.sample.tutorial"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"
@@ -53,6 +53,10 @@ dependencies {
     
     // include Nuwa Robot SDK in /libs
     implementation fileTree(dir: 'libs', include: ['*.aar'])
+
+    implementation "io.livekit:livekit-android:2.18.2"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.7.0"
+    implementation "androidx.activity:activity-ktx:1.8.2"
 }
 
 
