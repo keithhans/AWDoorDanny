@@ -64,8 +64,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun connectToRoom() {
         val url = "wss://anywhere-door-uav9tfq2.livekit.cloud"
-        val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTEzNTk1MDIsImlzcyI6IkFQSUVqaWV5d0NXdTVYRyIsIm5hbWUiOiJrZWl0aCIsIm5iZiI6MTc1MTI3MzEwMiwic3ViIjoia2VpdGgiLCJ2aWRlbyI6eyJyb29tIjoiYWxwaGEiLCJyb29tSm9pbiI6dHJ1ZX19.HptTr_1WYhqAcwUGwhbVcq1ZDaTwHunuyoACXGAWQXw"
-
+        // val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTEzNTk1MDIsImlzcyI6IkFQSUVqaWV5d0NXdTVYRyIsIm5hbWUiOiJrZWl0aCIsIm5iZiI6MTc1MTI3MzEwMiwic3ViIjoia2VpdGgiLCJ2aWRlbyI6eyJyb29tIjoiYWxwaGEiLCJyb29tSm9pbiI6dHJ1ZX19.HptTr_1WYhqAcwUGwhbVcq1ZDaTwHunuyoACXGAWQXw"
+        val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTIwNDA0NTMsImlzcyI6IkFQSUVqaWV5d0NXdTVYRyIsIm5hbWUiOiJrZWl0aCIsIm5iZiI6MTc1MTQzNTY1Mywic3ViIjoia2VpdGgiLCJ2aWRlbyI6eyJyb29tIjoiYWxwaGEiLCJyb29tSm9pbiI6dHJ1ZX19.yu_6Iacfa4J-puQLMmnt1QqOqgnkLwOG7txxA8UDjHg"
+ 
         lifecycleScope.launch {
             // Setup event handling.
             launch {

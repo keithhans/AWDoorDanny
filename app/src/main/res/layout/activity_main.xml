@@ -12,7 +12,7 @@
 
     <io.livekit.android.renderer.TextureViewRenderer
         android:id="@+id/local_camera"
-        android:layout_width="150dp"
+        android:layout_width="200dp"
         android:layout_height="150dp"
         android:layout_gravity="bottom|end"
         android:layout_margin="10dp" />
