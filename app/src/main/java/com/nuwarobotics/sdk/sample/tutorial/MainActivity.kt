@@ -32,6 +32,10 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
+    companion object {
+        private const val TAG = "xxx_nuwa_sdk"
+    }
+
     override fun onClick(v: View) {
         // Handle click events here
     }
@@ -39,11 +43,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivityMainBinding
     lateinit var room: Room
     private lateinit var mRobot: NuwaRobotAPI
+    private lateinit var mToast: Toast
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT)
 
         // Create Room object.
         room = LiveKit.create(applicationContext)
@@ -58,8 +65,179 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         mRobot = NuwaRobotAPI(this, IClientId(packageName))
 
         // register Nuwa Robot Listener
-        //registerNuwaRobotListener()
+        registerNuwaRobotListener()
+        
 
+    }
+
+    private fun showToast(message: String) {
+        mToast.setText(message)
+        mToast.show()
+    }
+
+    private fun registerNuwaRobotListener() {
+        mRobot.registerRobotEventListener(object : RobotEventListener {
+            override fun onWikiServiceStart() {
+                Log.d(TAG, "onWikiServiceStart")
+                showToast("onWikiServiceStart:")
+                mRobot.startTTS("機器人準備好了")
+                mRobot.hideWindow(false)
+            }
+
+            override fun onWikiServiceStop() {
+                Log.d(TAG, "onWikiServiceStop")
+            }
+
+            override fun onWikiServiceCrash() {
+                Log.d(TAG, "onWikiServiceCrash")
+            }
+
+            override fun onWikiServiceRecovery() {
+                Log.d(TAG, "onWikiServiceRecovery")
+            }
+
+            override fun onStartOfMotionPlay(motion: String) {
+                Log.d(TAG, "onStartOfMotionPlay:$motion")
+                showToast("onStartOfMotionPlay:$motion")
+            }
+
+            override fun onPauseOfMotionPlay(motion: String) {
+                Log.d(TAG, "onPauseOfMotionPlay:$motion")
+            }
+
+            override fun onStopOfMotionPlay(motion: String) {
+                Log.d(TAG, "onStopOfMotionPlay:$motion")
+                showToast("onStopOfMotionPlay:$motion")
+            }
+
+            override fun onCompleteOfMotionPlay(motion: String) {
+                Log.d(TAG, "onCompleteOfMotionPlay:$motion")
+                showToast("onCompleteOfMotionPlay:$motion")
+                mRobot.hideWindow(false)
+            }
+
+            override fun onPlayBackOfMotionPlay(motion: String) {
+                Log.d(TAG, "onPlayBackOfMotionPlay:$motion")
+            }
+
+            override fun onErrorOfMotionPlay(errorcode: Int) {
+                Log.d(TAG, "onErrorOfMotionPlay:$errorcode")
+                mRobot.hideWindow(false)
+            }
+
+            override fun onPrepareMotion(b: Boolean, s: String, v: Float) {
+            }
+
+            override fun onCameraOfMotionPlay(motion: String) {
+                Log.d(TAG, "onCameraOfMotionPlay:$motion")
+            }
+
+            override fun onGetCameraPose(
+                x: Float, y: Float, z: Float,
+                Xx: Float, Yx: Float, Zx: Float,
+                Xy: Float, Yy: Float, Zy: Float,
+                Xz: Float, Yz: Float, Zz: Float
+            ) {
+            }
+
+            override fun onTouchEvent(type: Int, touch: Int) {
+                Log.d(TAG, "onTouchEvent:$type, touch:$touch")
+            }
+
+            override fun onPIREvent(value: Int) {
+                Log.d(TAG, "onPIREvent:$value")
+            }
+
+            override fun onTap(body: Int) {
+                Log.d(TAG, "onTap:$body")
+            }
+
+            override fun onLongPress(body: Int) {
+                Log.d(TAG, "onLongPress:$body")
+            }
+
+            override fun onWindowSurfaceReady() {
+                Log.d(TAG, "onWindowSurfaceReady")
+            }
+
+            override fun onWindowSurfaceDestroy() {
+                Log.d(TAG, "onWindowSurfaceDestroy")
+            }
+
+            override fun onTouchEyes(eyeLR: Int, type: Int) {
+                Log.d(TAG, "onTouchEyes:$eyeLR, type:$type")
+            }
+
+            override fun onRawTouch(i: Int, i1: Int, i2: Int) {
+            }
+
+            override fun onFaceSpeaker(direction: Float) {
+                Log.d(TAG, "onFaceSpeaker:$direction")
+            }
+
+            override fun onActionEvent(i: Int, i1: Int) {
+            }
+
+            override fun onDropSensorEvent(i: Int) {
+                Log.d(TAG, "onDropSensorEvent:$i")
+            }
+
+            override fun onMotorErrorEvent(i: Int, i1: Int) {
+                Log.d(TAG, "onMotorErrorEvent:$i")
+            }
+        })
+
+        mRobot.registerVoiceEventListener(object : VoiceEventListener {
+            override fun onWakeup(isError: Boolean, score: String, direction: Float) {
+                Log.d(TAG, "onWakeup:${!isError}, score:$score")
+                showToast("onWakeup:${!isError}, score:$score")
+            }
+
+            override fun onTTSComplete(isError: Boolean) {
+                Log.d(TAG, "onTTSComplete${!isError}")
+                showToast("onTTSComplete:${!isError}")
+            }
+
+            override fun onSpeechRecognizeComplete(isError: Boolean, iFlyResult: ResultType, json: String) {
+                Log.d(TAG, "onSpeechRecognizeComplete:${!isError}, json:$json")
+                showToast("雲端結果：$json")
+            }
+
+            override fun onSpeech2TextComplete(isError: Boolean, json: String) {
+                Log.d(TAG, "onSpeech2TextComplete:${!isError}, json:$json")
+                showToast("語音轉文字(語音輸入法)：$json")
+            }
+
+            override fun onSpeechState(type: ListenType, state: VoiceEventListener.SpeechState) {
+                Log.d(TAG, "onSpeechState:$type, state:$state")
+            }
+
+            override fun onMixUnderstandComplete(isError: Boolean, iFlyResult: ResultType, json: String) {
+                Log.d(TAG, "onMixUnderstandComplete:${!isError}, json:$json")
+                if (!isError) {
+                    if (iFlyResult == ResultType.LOCAL_COMMAND) {
+                        showToast("local ASR:$json")
+                    } else {
+                        showToast("cloud ASR:$json")
+                    }
+                } else {
+                    mRobot.startTTS("網路或訊飛不夠力")
+                    showToast("網路或訊飛不夠力 $json")
+                }
+            }
+
+            override fun onGrammarState(isError: Boolean, info: String) {
+                Log.d(TAG, "onGrammarState:${!isError}, info:$info")
+               
+            }
+
+            override fun onListenVolumeChanged(listenType: ListenType, volume: Int) {
+            }
+
+            override fun onSpeakState(type: VoiceEventListener.SpeakType, state: VoiceEventListener.SpeakState) {
+                Log.d(TAG, "onSpeakState:$type, state:$state")
+            }
+        })
     }
 
     private fun connectToRoom() {
@@ -134,8 +312,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 // Check if any permissions weren't granted.
                 for (grant in grants.entries) {
                     if (!grant.value) {
-                        Toast.makeText(this, "Missing permission: ${grant.key}", Toast.LENGTH_SHORT).show()
-
+                        showToast("Missing permission: ${grant.key}")
                         hasDenied = true
                     }
                 }
