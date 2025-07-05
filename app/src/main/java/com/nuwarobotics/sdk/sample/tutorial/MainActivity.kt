@@ -287,6 +287,48 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             if (remoteVideoTrack != null) {
                 attachVideo(remoteVideoTrack)
             }
+
+            // register rpc
+            localParticipant.registerRpcMethod(
+                "up"
+            ) { data ->
+                println("Received greeting from ${data.callerIdentity}: ${data.payload}")
+                mRobot.forwardInAccelerationEx()
+                Thread.sleep(500) // 休息0.5秒
+                mRobot.stopInAccelerationEx()
+                "up, ${data.callerIdentity}!"
+            }
+
+            localParticipant.registerRpcMethod(
+                "down"
+            ) { data ->
+                println("Received greeting from ${data.callerIdentity}: ${data.payload}")
+                mRobot.backInAccelerationEx()
+                Thread.sleep(500) // 休息0.5秒
+                mRobot.stopInAccelerationEx()
+                "down, ${data.callerIdentity}!"
+            }
+
+            localParticipant.registerRpcMethod(
+                "left"
+            ) { data ->
+                println("Received greeting from ${data.callerIdentity}: ${data.payload}")
+                mRobot.turnLeftEx()
+                Thread.sleep(500) // 休息0.5秒
+                mRobot.stopTurnEx()
+                "left, ${data.callerIdentity}!"
+            }
+
+            localParticipant.registerRpcMethod(
+                "right"
+            ) { data ->
+                println("Received greeting from ${data.callerIdentity}: ${data.payload}")
+                mRobot.turnRightEx()
+                Thread.sleep(500) // 休息0.5秒
+                mRobot.stopTurnEx()
+                "right, ${data.callerIdentity}!"
+            }
+
         }
     }
 
