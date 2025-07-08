@@ -28,12 +28,14 @@ import io.livekit.android.room.Room
 import io.livekit.android.room.track.LocalVideoTrack
 import io.livekit.android.room.track.Track
 import io.livekit.android.room.track.VideoTrack
+import io.livekit.android.room.track.AudioTrack
+
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
-        private const val TAG = "xxx_nuwa_sdk"
+        private const val TAG = "anywhere_door"
     }
 
     override fun onClick(v: View) {
@@ -245,7 +247,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val url = "wss://anywhere-door-uav9tfq2.livekit.cloud"
         // val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTEzNTk1MDIsImlzcyI6IkFQSUVqaWV5d0NXdTVYRyIsIm5hbWUiOiJrZWl0aCIsIm5iZiI6MTc1MTI3MzEwMiwic3ViIjoia2VpdGgiLCJ2aWRlbyI6eyJyb29tIjoiYWxwaGEiLCJyb29tSm9pbiI6dHJ1ZX19.HptTr_1WYhqAcwUGwhbVcq1ZDaTwHunuyoACXGAWQXw"
         val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTIwNDA0NTMsImlzcyI6IkFQSUVqaWV5d0NXdTVYRyIsIm5hbWUiOiJrZWl0aCIsIm5iZiI6MTc1MTQzNTY1Mywic3ViIjoia2VpdGgiLCJ2aWRlbyI6eyJyb29tIjoiYWxwaGEiLCJyb29tSm9pbiI6dHJ1ZX19.yu_6Iacfa4J-puQLMmnt1QqOqgnkLwOG7txxA8UDjHg"
- 
+        Log.d(TAG, "connectToRoom: $url")
+
         lifecycleScope.launch {
             // Setup event handling.
             launch {
@@ -261,17 +264,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             try {
                 room.connect(
                     url,
-                    token,
+                    token
                 )
             } catch (e: Exception) {
-                Log.e("MainActivity", "Error while connecting to server:", e)
+                Log.e(TAG, "Error while connecting to server:", e)
                 return@launch
             }
 
             // Turn on audio/video recording.
             val localParticipant = room.localParticipant
-            localParticipant.setMicrophoneEnabled(true)
-            localParticipant.setCameraEnabled(true)
+            val micRet = localParticipant.setMicrophoneEnabled(true)
+            Log.d(TAG, "setMicrophoneEnabled result: $micRet")
+            val cameraRet = localParticipant.setCameraEnabled(true)
+            Log.d(TAG, "setCameraEnabled result: $cameraRet")
 
             // Attach local video camera
             val localTrack = localParticipant.getTrackPublication(Track.Source.CAMERA)?.track as? LocalVideoTrack
@@ -294,8 +299,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             ) { data ->
                 println("Received greeting from ${data.callerIdentity}: ${data.payload}")
                 mRobot.forwardInAccelerationEx()
-                Thread.sleep(500) // 休息0.5秒
-                mRobot.stopInAccelerationEx()
                 "up, ${data.callerIdentity}!"
             }
 
@@ -304,8 +307,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             ) { data ->
                 println("Received greeting from ${data.callerIdentity}: ${data.payload}")
                 mRobot.backInAccelerationEx()
-                Thread.sleep(500) // 休息0.5秒
-                mRobot.stopInAccelerationEx()
                 "down, ${data.callerIdentity}!"
             }
 
@@ -314,8 +315,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             ) { data ->
                 println("Received greeting from ${data.callerIdentity}: ${data.payload}")
                 mRobot.turnLeftEx()
-                Thread.sleep(500) // 休息0.5秒
-                mRobot.stopTurnEx()
                 "left, ${data.callerIdentity}!"
             }
 
@@ -324,8 +323,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             ) { data ->
                 println("Received greeting from ${data.callerIdentity}: ${data.payload}")
                 mRobot.turnRightEx()
-                Thread.sleep(500) // 休息0.5秒
-                mRobot.stopTurnEx()
                 "right, ${data.callerIdentity}!"
             }
 
@@ -336,6 +333,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val track = event.track
         if (track is VideoTrack) {
             attachVideo(track)
+            Log.d(TAG, "onTrackSubscribed: VideoTrack")
+        }
+        if (track is AudioTrack) {
+            Log.d(TAG, "onTrackSubscribed: AudioTrack")
         }
     }
 
@@ -356,6 +357,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 for (grant in grants.entries) {
                     if (!grant.value) {
                         showToast("Missing permission: ${grant.key}")
+                        Log.d(TAG, "requestNeededPermissions: ${grant.key}")
                         hasDenied = true
                     }
                 }
@@ -369,6 +371,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val neededPermissions = listOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA)
             .filter { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_DENIED }
             .toTypedArray()
+
+        Log.d(TAG, "requestNeededPermissions: ${neededPermissions.joinToString(", ")}")
 
         if (neededPermissions.isNotEmpty()) {
             requestPermissionLauncher.launch(neededPermissions)
