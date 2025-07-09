@@ -19,9 +19,11 @@ import com.nuwarobotics.service.agent.VoiceEventListener.ResultType
 import com.nuwarobotics.sdk.sample.tutorial.databinding.ActivityMainBinding
 
 import androidx.lifecycle.lifecycleScope
+import io.livekit.android.AudioOptions
 
 
 import io.livekit.android.LiveKit
+import io.livekit.android.LiveKitOverrides
 import io.livekit.android.events.RoomEvent
 import io.livekit.android.events.collect
 import io.livekit.android.room.Room
@@ -29,6 +31,7 @@ import io.livekit.android.room.track.LocalVideoTrack
 import io.livekit.android.room.track.Track
 import io.livekit.android.room.track.VideoTrack
 import io.livekit.android.room.track.AudioTrack
+import io.livekit.android.room.track.LocalAudioTrack
 
 import kotlinx.coroutines.launch
 
@@ -61,7 +64,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         registerNuwaRobotListener()
 
         // Create Room object.
-        room = LiveKit.create(applicationContext)
+        room = LiveKit.create(applicationContext,
+            overrides = LiveKitOverrides(
+                audioOptions = AudioOptions(
+                    javaAudioDeviceModuleCustomizer = { builder ->
+                        builder.setUseStereoInput(true)
+                    }
+                )
+            )
+        )
 
         // Setup the video renderer
         room.initVideoRenderer(binding.renderer)
@@ -292,6 +303,27 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             if (remoteVideoTrack != null) {
                 attachVideo(remoteVideoTrack)
             }
+
+            val audioTrack = localParticipant.getTrackPublication(Track.Source.MICROPHONE)?.track as? LocalAudioTrack
+            audioTrack?.setAudioBufferCallback(object : io.livekit.android.audio.AudioBufferCallback {
+                override fun onBuffer(
+                    buffer: java.nio.ByteBuffer,
+                    audioFormat: Int,
+                    channelCount: Int,
+                    sampleRate: Int,
+                    bytesRead: Int,
+                    captureTimeNs: Long
+                ): Long {
+                    val formatName = when (audioFormat) {
+                        android.media.AudioFormat.ENCODING_PCM_8BIT -> "PCM_8BIT"
+                        android.media.AudioFormat.ENCODING_PCM_16BIT -> "PCM_16BIT"
+                        android.media.AudioFormat.ENCODING_PCM_FLOAT -> "PCM_FLOAT"
+                        else -> "UNKNOWN($audioFormat)"
+                    }
+                    Log.d(TAG, "AudioBuffer - Format: $formatName, Channels: $channelCount, SampleRate: $sampleRate Hz, BytesRead: $bytesRead, BufferSize: ${buffer.remaining()}, CaptureTime: ${captureTimeNs}ns")
+                    return captureTimeNs
+                }
+            })
 
             // register rpc
             localParticipant.registerRpcMethod(

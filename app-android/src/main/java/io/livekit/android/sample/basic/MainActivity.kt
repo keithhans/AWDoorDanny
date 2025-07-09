@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var room: Room
     private lateinit var localParticipant: LocalParticipant
+    private var isMuted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,9 +68,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun connectToRoom() {
         val url = "wss://anywhere-door-uav9tfq2.livekit.cloud"
-        //val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTIwNDA0NTMsImlzcyI6IkFQSUVqaWV5d0NXdTVYRyIsIm5hbWUiOiJrZWl0aCIsIm5iZiI6MTc1MTQzNTY1Mywic3ViIjoia2VpdGgiLCJ2aWRlbyI6eyJyb29tIjoiYWxwaGEiLCJyb29tSm9pbiI6dHJ1ZX19.yu_6Iacfa4J-puQLMmnt1QqOqgnkLwOG7txxA8UDjHg"
-        val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTIwNDA2NDksImlzcyI6IkFQSUVqaWV5d0NXdTVYRyIsIm5hbWUiOiJwaWthYmVhciIsIm5iZiI6MTc1MTQzNTg0OSwic3ViIjoicGlrYWJlYXIiLCJ2aWRlbyI6eyJyb29tIjoiYWxwaGEiLCJyb29tSm9pbiI6dHJ1ZX19.lxkBFbvtesNwCalkoUidMJZQkBuFTMofO9yxO4HlMVc"
-
+        val token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTgwOTA0NzcsImlzcyI6IkFQSUVqaWV5d0NXdTVYRyIsIm5hbWUiOiJwaWthYmVhciIsIm5iZiI6MTc1MjA0MjQ3Nywic3ViIjoicGlrYWJlYXIiLCJ2aWRlbyI6eyJyb29tIjoiYWxwaGEiLCJyb29tSm9pbiI6dHJ1ZX19.cQ7XAJfaj0lt4oPTZ_4CH0kIDj-nbxoAkOoxDDwruOs"
         lifecycleScope.launch {
             // Setup event handling.
             launch {
@@ -166,6 +165,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<View>(R.id.btn_left).setOnClickListener { left() }
         findViewById<View>(R.id.btn_right).setOnClickListener { right() }
         findViewById<View>(R.id.btn_stop).setOnClickListener { stop() }
+        findViewById<View>(R.id.btn_mute).setOnClickListener { toggleMute() }
     }
 
     private fun up() {
@@ -251,6 +251,25 @@ class MainActivity : AppCompatActivity() {
     private fun stop() {
         Toast.makeText(this, "停止移动", Toast.LENGTH_SHORT).show()
         // TODO: 实现停止移动的逻辑
+    }
+
+    private fun toggleMute() {
+        if (::localParticipant.isInitialized) {
+            isMuted = !isMuted
+            
+            lifecycleScope.launch {
+                localParticipant.setMicrophoneEnabled(!isMuted)
+            }
+            
+            val muteButton = findViewById<android.widget.Button>(R.id.btn_mute)
+            muteButton.text = if (isMuted) "取消静音" else "静音"
+            
+            val message = if (isMuted) "麦克风已静音" else "麦克风已开启"
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            Log.d("MainActivity", "Microphone muted: $isMuted")
+        } else {
+            Toast.makeText(this, "请先连接到房间", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroy() {

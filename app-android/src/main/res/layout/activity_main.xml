@@ -68,6 +68,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="下" />
+
+        <Button
+            android:id="@+id/btn_mute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="静音" />
     </LinearLayout>
 
 </FrameLayout>
